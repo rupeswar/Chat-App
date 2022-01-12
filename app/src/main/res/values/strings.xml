@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Chat App</string>
+    <string name="tab_text_1">Tab 1</string>
+    <string name="tab_text_2">Tab 2</string>
+    <string name="server_client_id">52262434349-0dtgm02nsp5t9bqqs392pg626pog4pd8.apps.googleusercontent.com</string>
+    <string name="server_base_url">https://chat-app.rupeswar.repl.co</string>
+</resources>
