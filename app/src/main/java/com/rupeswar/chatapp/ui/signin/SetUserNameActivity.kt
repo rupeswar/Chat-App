@@ -25,12 +25,12 @@ class SetUserNameActivity : AppCompatActivity() {
         val editText = binding.userName
         binding.next.setOnClickListener {
             val jsonObject = JSONObject()
-            jsonObject.put("id", AuthUtil.currentUser!!.uid)
+            jsonObject.put("token", AuthUtil.authToken)
             jsonObject.put("userName", editText.text)
 
             val jsonObjectRequest = JsonObjectRequest(
                 Request.Method.POST,
-                "${getString(R.string.server_base_url)}/setUserName",
+                "${getString(R.string.server_base_url)}/auth/setUserName",
                 jsonObject,
                 {
                     val intent = Intent(this, MainActivity::class.java)

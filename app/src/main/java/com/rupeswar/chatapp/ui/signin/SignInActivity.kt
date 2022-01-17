@@ -88,7 +88,7 @@ class SignInActivity : AppCompatActivity() {
 
         val jsonObjectRequest = JsonObjectRequest(
             Request.Method.POST,
-            "${getString(R.string.server_base_url)}/verifyIdToken",
+            "${getString(R.string.server_base_url)}/auth/verifyIdToken",
             jsonObject,
             {
                 val isIdTokenValid = it.getBoolean("isIdTokenValid")
@@ -98,6 +98,7 @@ class SignInActivity : AppCompatActivity() {
                     val isUserNameDefined = it.getBoolean("isUserNameDefined")
                     updateUI(account, isUserNameDefined)
                     AuthUtil.currentUser = User.fromJson(it.getJSONObject("user"))
+                    AuthUtil.authToken = it.getString("token")
                 }
                 else {
                     updateUI(null)

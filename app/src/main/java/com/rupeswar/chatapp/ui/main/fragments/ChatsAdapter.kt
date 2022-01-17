@@ -1,21 +1,16 @@
 package com.rupeswar.chatapp.ui.main.fragments
 
 import android.content.Intent
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
-import com.android.volley.Request
-import com.android.volley.toolbox.JsonObjectRequest
 import com.rupeswar.chatapp.R
 import com.rupeswar.chatapp.models.Chat
 import com.rupeswar.chatapp.ui.chat.ChatActivity
 import com.rupeswar.chatapp.utils.TimeUtils
-import com.rupeswar.chatapp.utils.VolleySingleton
-import org.json.JSONObject
 
 class ChatsAdapter : RecyclerView.Adapter<ChatsAdapter.ChatsViewHolder>() {
 
@@ -33,17 +28,6 @@ class ChatsAdapter : RecyclerView.Adapter<ChatsAdapter.ChatsViewHolder>() {
 
         view.setOnClickListener {
             Toast.makeText(parent.context, "Selected ${viewHolder.name.text}", Toast.LENGTH_SHORT).show()
-            val jsonObject = JSONObject()
-            jsonObject.put("body", "This message is from Chat App Android XD XD")
-            val jsonObjectRequest = JsonObjectRequest(Request.Method.POST, "${parent.context.getString(R.string.server_base_url)}/api/test", jsonObject, {
-                Toast.makeText(parent.context, "Received Response", Toast.LENGTH_SHORT).show()
-                Log.d("API Test Success", it.toString())
-            }, {
-                Toast.makeText(parent.context, "An Error Occurred...", Toast.LENGTH_SHORT).show()
-                Log.d("API Test Failed", it.message.toString())
-            })
-
-            VolleySingleton.getInstance(parent.context).addToRequestQueue(jsonObjectRequest)
 
             val chatIntent = Intent(parent.context, ChatActivity::class.java)
             val chat = chats[viewHolder.adapterPosition]
