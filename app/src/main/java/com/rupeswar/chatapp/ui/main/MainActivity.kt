@@ -7,9 +7,15 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
+import com.rupeswar.chatapp.R
 import com.rupeswar.chatapp.databinding.ActivityMainBinding
+import com.rupeswar.chatapp.utils.SocketSingleton
 
 class MainActivity : AppCompatActivity() {
+
+    companion object {
+        private val socket get() = SocketSingleton.socket
+    }
 
     private lateinit var binding: ActivityMainBinding
 
@@ -33,5 +39,14 @@ class MainActivity : AppCompatActivity() {
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                 .setAction("Action", null).show()
         }
+
+        val serverURL = getString(R.string.server_base_url)
+        SocketSingleton.initialiseSocket(serverURL)
+
+        socket.on("connect") {
+            socket.emit("test", "Hello")
+        }
     }
+
+
 }

@@ -18,7 +18,9 @@
             android:theme="@style/Theme.ChatApp.NoActionBar"/>
         <activity
             android:name=".ui.chat.ChatActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:parentActivityName=".ui.main.MainActivity"
+            android:theme="@style/Theme.ChatApp.NoActionBar"/>
         <activity
             android:name=".ui.signin.SignInActivity"
             android:exported="true">

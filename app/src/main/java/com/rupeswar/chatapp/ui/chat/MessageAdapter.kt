@@ -17,7 +17,7 @@ class MessageAdapter : RecyclerView.Adapter<MessageAdapter.MessageViewHolder>() 
     private val OUTGOING_MESSAGE = 1
     private val FOLLOW_UP_MESSAGE = 2
 
-    fun checkMessageType(messageType: Int, messageParam: Int): Boolean {
+    private fun checkMessageType(messageType: Int, messageParam: Int): Boolean {
         return messageType and messageParam == messageParam
     }
 
@@ -48,7 +48,7 @@ class MessageAdapter : RecyclerView.Adapter<MessageAdapter.MessageViewHolder>() 
         val viewHolder = MessageViewHolder(view)
 
         if (checkMessageType(messageType, FOLLOW_UP_MESSAGE)) {
-            viewHolder.tail.visibility = View.GONE
+            viewHolder.tail.visibility = View.INVISIBLE
             viewHolder.messageBox.background = AppCompatResources.getDrawable(
                 parent.context,
                 if (checkMessageType(messageType, OUTGOING_MESSAGE))
@@ -76,5 +76,11 @@ class MessageAdapter : RecyclerView.Adapter<MessageAdapter.MessageViewHolder>() 
         messages.addAll(updatedMessages)
 
         notifyDataSetChanged()
+    }
+
+    fun addMessage(message: Message) {
+        messages.add(message)
+
+        notifyItemInserted(messages.size-1)
     }
 }

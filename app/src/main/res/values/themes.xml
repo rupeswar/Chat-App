@@ -50,5 +50,23 @@
         <item name="cornerSize">50%</item>
     </style>
 
+    <style name="ShapeAppearance.MyApp.FloatingActionButton" parent="ShapeAppearance.MaterialComponents.SmallComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
+
+    <style name="Widget.MyApp.FloatingActionButton.Transparent" parent="Widget.MaterialComponents.FloatingActionButton">
+        <item name="materialThemeOverlay">@style/ThemeOverlay.MyApp.FloatingActionButton.Transparent</item>
+        <item name="shapeAppearanceOverlay">
+            @style/ShapeAppearance.MyApp.FloatingActionButton
+        </item>
+    </style>
+
+    <style name="ThemeOverlay.MyApp.FloatingActionButton.Transparent" parent="">
+        <item name="colorSecondary">@color/white</item>
+        <item name="colorOnSecondary">#828689</item>
+        <item name="colorOnSurface">@android:color/transparent</item>
+    </style>
+
 
 </resources>
