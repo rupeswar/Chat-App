@@ -8,6 +8,10 @@ import com.rupeswar.chatapp.models.User
 import com.rupeswar.chatapp.repositories.ChatRepository
 import com.rupeswar.chatapp.repositories.UserRepository
 import com.rupeswar.chatapp.utils.AuthUtil
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.buffer
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 import java.lang.IllegalArgumentException
@@ -20,6 +24,34 @@ class ChatsViewModel(private val userRepository: UserRepository, private val cha
     // - Repository is completely separated from the UI through the ViewModel.
     val allUsers: LiveData<List<User>> = userRepository.allUsers.asLiveData()
     val allChats: LiveData<ArrayList<Chat>> = chatRepository.allChats
+
+    private val messageJSONFlow = MutableSharedFlow<JSONObject>()
+
+    init {
+        val messageFlow = messageJSONFlow.map { messageJSON ->
+            val senderId = messageJSON.getString("from")
+            val recipientId = messageJSON.getString("to")
+            val sender = getUserNameOrYou(senderId)
+            val recipient = getUserNameOrYou(recipientId)
+            messageJSON.put("from", sender)
+            messageJSON.put("to", recipient)
+
+            val message = Message.fromJSON(messageJSON)
+
+            if(sender == "You")
+                arrayOf(recipientId, recipient, message)
+            else
+                arrayOf(senderId, sender, message)
+        }
+
+        viewModelScope.launch {
+            messageFlow
+                .buffer()
+                .collect {
+                chatRepository.addMessage(it[0] as String, it[1] as String, it[2] as Message)
+            }
+        }
+    }
 
     /**
      * Launching a new coroutine to insert the data in a non-blocking way
@@ -45,21 +77,7 @@ class ChatsViewModel(private val userRepository: UserRepository, private val cha
     }
 
     fun addMessage(messageJSON: JSONObject) = viewModelScope.launch {
-        val senderId = messageJSON.getString("from")
-        val recipientId = messageJSON.getString("to")
-        val sender = getUserNameOrYou(senderId)
-        val recipient = getUserNameOrYou(recipientId)
-        messageJSON.put("from", sender)
-        messageJSON.put("to", recipient)
-
-        Log.d("LiveData Message", messageJSON.getString("message"))
-
-        val message = Message.fromJSON(messageJSON)
-
-        if(sender == "You")
-            chatRepository.addMessage(recipientId, recipient, message)
-        else
-            chatRepository.addMessage(senderId, sender, message)
+        messageJSONFlow.emit(messageJSON)
     }
 
     fun getMessages(chatId: String): LiveData<ArrayList<Message>> {

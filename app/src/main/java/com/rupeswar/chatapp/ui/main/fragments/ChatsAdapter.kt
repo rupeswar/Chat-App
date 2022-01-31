@@ -31,7 +31,7 @@ class ChatsAdapter : ListAdapter<Chat, ChatsAdapter.ChatsViewHolder>(ChatsCompar
         }
 
         override fun areContentsTheSame(oldItem: Chat, newItem: Chat): Boolean {
-            return oldItem.cid == newItem.cid
+            return oldItem.cid == newItem.cid && oldItem.lastMessage == newItem.lastMessage
         }
     }
 
