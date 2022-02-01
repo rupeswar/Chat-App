@@ -5,8 +5,8 @@ import androidx.annotation.WorkerThread
 import com.rupeswar.chatapp.daos.UserDao
 import com.rupeswar.chatapp.models.User
 import com.rupeswar.chatapp.utils.SocketSingleton
+import io.socket.client.Ack
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import org.json.JSONObject
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -31,15 +31,13 @@ class UserRepository(private val userDao: UserDao) {
     @WorkerThread
     suspend fun getUser(userId: String): User {
         return userDao.getUser(userId) ?: run {
-            suspendCoroutine { suspendCoroutine ->
+            suspendCoroutine { coroutine ->
                 SocketSingleton.socket.let { socket ->
-                    socket.emit("user", userId)
-                    socket.on("user"){
+                    socket.emit("user", userId, Ack{
                         val userJSON = it[0] as JSONObject
                         val user = User.fromJson(userJSON)
-                        suspendCoroutine.resume(user)
-                        socket.off("user")
-                    }
+                        coroutine.resume(user)
+                    })
                 }
             }
         }
@@ -47,24 +45,23 @@ class UserRepository(private val userDao: UserDao) {
 
     suspend fun getUserByUserName(userName: String): User? {
         return null ?: run {
-            suspendCoroutine<User?> { suspendCoroutine ->
+            suspendCoroutine { coroutine ->
                 SocketSingleton.socket.let { socket ->
                     Log.d("Find", "Sending Request")
-                    socket.emit("add-user", userName)
-                    socket.on("add-user"){
-                        val userJSON = it[0] as JSONObject
+                    socket.emit("add-user", userName, Ack{
+                        val status = it[0] as String
+
+                        if(status == "error") {
+                            coroutine.resume(null)
+                            return@Ack
+                        }
+
+                        val userJSON = it[1] as JSONObject
 
                         val user = User.fromJson(userJSON)
-                        suspendCoroutine.resume(user)
+                        coroutine.resume(user)
                         Log.d("Find", "Request received")
-                        socket.off("add-user")
-                        socket.off("add-user-error")
-                    }
-                    socket.on("add-user-error"){
-                        suspendCoroutine.resume(null)
-                        socket.off("add-user")
-                        socket.off("add-user-error")
-                    }
+                    })
                 }
             }
         }

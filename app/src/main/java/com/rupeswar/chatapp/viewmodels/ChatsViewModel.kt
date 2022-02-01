@@ -38,17 +38,20 @@ class ChatsViewModel(private val userRepository: UserRepository, private val cha
 
             val message = Message.fromJSON(messageJSON)
 
-            if(sender == "You")
-                arrayOf(recipientId, recipient, message)
-            else
-                arrayOf(senderId, sender, message)
+            val isSenderYou = sender == "You"
+
+            object {
+                val chatId = if(isSenderYou) recipientId else senderId
+                val chatRecipient = if(isSenderYou) recipient else sender
+                val message = message
+            }
         }
 
         viewModelScope.launch {
             messageFlow
                 .buffer()
-                .collect {
-                chatRepository.addMessage(it[0] as String, it[1] as String, it[2] as Message)
+                .collect {packet ->
+                chatRepository.addMessage(packet.chatId, packet.chatRecipient, packet.message)
             }
         }
     }

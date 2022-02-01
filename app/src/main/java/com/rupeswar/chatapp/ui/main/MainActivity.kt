@@ -19,6 +19,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import androidx.activity.viewModels
 import com.rupeswar.chatapp.ui.contact.AddContactActivity
+import io.socket.client.Ack
 
 class MainActivity : AppCompatActivity() {
 
@@ -27,7 +28,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private lateinit var binding: ActivityMainBinding
-    private val chatsViewModel: ChatsViewModel by viewModels{
+    private val chatsViewModel: ChatsViewModel by viewModels {
         (application as ChatApplication).run {
             ChatsViewModelFactory(userRepository, chatRepository)
         }
@@ -55,10 +56,6 @@ class MainActivity : AppCompatActivity() {
         }
 
         initialiseSocket()
-
-        socket.on("connect") {
-            socket.emit("test", "Hello")
-        }
     }
 
     private fun initialiseSocket() {
@@ -67,26 +64,21 @@ class MainActivity : AppCompatActivity() {
 
         getMessages()
 
-        socket.on("message"){
+        socket.on("message") {
             val messageJSON = it[0] as JSONObject
             chatsViewModel.addMessage(messageJSON)
         }
     }
 
     private fun getMessages() {
-        socket.on("connect"){
-            socket.emit("chats", AuthUtil.currentUser!!.uid)
-            socket.on("chats"){
-                val jsonArray = it[0] as JSONArray
+        socket.emit("chats", AuthUtil.currentUser!!.uid, Ack {
+            val jsonArray = it[0] as JSONArray
 
-                for(i in 0 until  jsonArray.length()) {
-                    val messageJSON = jsonArray.getJSONObject(i)
-                    chatsViewModel.addMessage(messageJSON)
-                }
-
-                socket.off("chats")
+            for (i in 0 until jsonArray.length()) {
+                val messageJSON = jsonArray.getJSONObject(i)
+                chatsViewModel.addMessage(messageJSON)
             }
-        }
+        })
     }
 
 
