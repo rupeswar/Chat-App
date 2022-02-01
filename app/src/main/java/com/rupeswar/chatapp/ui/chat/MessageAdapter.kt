@@ -7,13 +7,15 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.rupeswar.chatapp.R
 import com.rupeswar.chatapp.models.Message
 
-class MessageAdapter : RecyclerView.Adapter<MessageAdapter.MessageViewHolder>() {
+class MessageAdapter : ListAdapter<Message, MessageAdapter.MessageViewHolder>(MessageComparator()) {
 
-    private val messages = ArrayList<Message>()
+//    private val messages = ArrayList<Message>()
     private val OUTGOING_MESSAGE = 1
     private val FOLLOW_UP_MESSAGE = 2
 
@@ -30,11 +32,21 @@ class MessageAdapter : RecyclerView.Adapter<MessageAdapter.MessageViewHolder>() 
         var mid: String? = null
     }
 
+    class MessageComparator : DiffUtil.ItemCallback<Message>() {
+        override fun areItemsTheSame(oldItem: Message, newItem: Message): Boolean {
+            return oldItem == newItem
+        }
+
+        override fun areContentsTheSame(oldItem: Message, newItem: Message): Boolean {
+            return oldItem.mid == newItem.mid
+        }
+    }
+
     override fun getItemViewType(position: Int): Int {
         var messageType = 0
-        if (position > 0 && messages[position].sender == messages[position - 1].sender)
+        if (position > 0 && getItem(position).sender == getItem(position - 1).sender)
             messageType = messageType xor FOLLOW_UP_MESSAGE
-        if (messages[position].sender == "You")
+        if (getItem(position).sender == "You")
             messageType = messageType xor OUTGOING_MESSAGE
         return messageType
     }
@@ -62,25 +74,8 @@ class MessageAdapter : RecyclerView.Adapter<MessageAdapter.MessageViewHolder>() 
     }
 
     override fun onBindViewHolder(holder: MessageViewHolder, position: Int) {
-        val message = messages[position]
+        val message = getItem(position)
 
         holder.text.text = message.message
-    }
-
-    override fun getItemCount(): Int {
-        return messages.size
-    }
-
-    fun updateMessages(updatedMessages: ArrayList<Message>) {
-        messages.clear()
-        messages.addAll(updatedMessages)
-
-        notifyDataSetChanged()
-    }
-
-    fun addMessage(message: Message) {
-        messages.add(message)
-
-        notifyItemInserted(messages.size-1)
     }
 }
